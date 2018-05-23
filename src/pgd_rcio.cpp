@@ -106,7 +106,7 @@ private:
 	std::string mpi_port;
 	
 	void out_cb(const std_msgs::Int32ConstPtr msg, int32_t port){
-		std::cout << rcio_names[port] << " " << msg->data << std::endl;
+		//std::cout << rcio_names[port] << " " << msg->data << std::endl;
 		set_pulse(port, msg->data);
 	}
 	
