@@ -57,6 +57,7 @@ public:
 							if(param.second.hasMember("default")){
 								pulse = static_cast<int>(param.second["default"]);
 							}
+							rcio_default_pulses[port] = pulse;
 							set_pulse(port, pulse);
 						}
 						break;
@@ -82,7 +83,12 @@ public:
 	}
 	
 	~PgdRcio(){
-		
+		if(mpi >= 0){
+			for(auto sub : sub_rcouts){
+				set_pulse(sub.first, rcio_default_pulses[sub.first]);
+			}
+			pigpio_stop(mpi);
+		}
 	}
 	
 private:
@@ -94,12 +100,14 @@ private:
 	std::map<int32_t, ros::Subscriber> sub_rcouts;
 	std::map<int32_t, ros::Publisher> pub_rcins;
 	std::map<int32_t, std::string> rcio_names;
+	std::map<int32_t, int32_t> rcio_default_pulses;
 	int32_t mpi;
 	std::string mpi_ip;
 	std::string mpi_port;
 	
 	void out_cb(const std_msgs::Int32ConstPtr msg, int32_t port){
 		std::cout << rcio_names[port] << " " << msg->data << std::endl;
+		set_pulse(port, msg->data);
 	}
 	
 	int32_t set_pulse(int32_t port, int32_t pulsewidth){
