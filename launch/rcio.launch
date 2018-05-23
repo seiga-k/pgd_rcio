@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+    <node pkg="pgd_rcio" type="pgd_rcio" name="rcio" output="screen">
+        <rosparam>
+            PigpiodIP: "172.20.0.82"
+            PigpiodPort: "8888"
+            gimbal_pitch:
+                port: 05
+                dir: 0
+                default: 1500
+            gimbal_roll:
+                port: 06
+                dir: 0
+                default: 1500
+            gimbal_yaw:
+                port: 13
+                dir: 0
+                default: 1500
+            gimbal_mode:
+                port: 19
+                dir: 0
+                default: 1000
+        </rosparam>
+    </node>
+</launch>
