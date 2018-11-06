@@ -57,6 +57,7 @@ public:
 							if(param.second.hasMember("default")){
 								pulse = static_cast<int>(param.second["default"]);
 							}
+							std::cout << "Set port " << port << " as output" << std::endl;
 							rcio_default_pulses[port] = pulse;
 							set_pulse(port, pulse);
 						}
@@ -75,6 +76,7 @@ public:
 								ROS_ERROR("Pigpiod Error. Failed to set callback : %s", pigpio_error(ret));
 								ros::shutdown();
 							}
+							std::cout << "Set port " << port << " as input" << std::endl;
 						}
 						break;
 					}
