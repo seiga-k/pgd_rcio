@@ -63,6 +63,19 @@ public:
 						break;
 						
 					case PgdRcio::IN:
+						{
+							pub_rcins[port] = nh.advertise<std_msgs::Int32>(name, 1);
+							int ret = set_mode(mpi, port, PI_INPUT);
+							if(ret < 0){
+								ROS_ERROR("Pigpiod Error. Failed to set pin mode : %s", pigpio_error(ret));
+								ros::shutdown();
+							}
+							ret = callback_ex(mpi, port, EITHER_EDGE, PgdRcio::in_cb, reinterpret_cast<void*>(this));
+							if(ret < 0){
+								ROS_ERROR("Pigpiod Error. Failed to set callback : %s", pigpio_error(ret));
+								ros::shutdown();
+							}
+						}
 						break;
 					}
 				}
@@ -101,6 +114,8 @@ private:
 	std::map<int32_t, ros::Publisher> pub_rcins;
 	std::map<int32_t, std::string> rcio_names;
 	std::map<int32_t, int32_t> rcio_default_pulses;
+	std::map<int32_t, uint32_t> rcio_rising_tick;
+	std::map<int32_t, uint32_t> rcio_falling_tick;
 	int32_t mpi;
 	std::string mpi_ip;
 	std::string mpi_port;
@@ -108,6 +123,22 @@ private:
 	void out_cb(const std_msgs::Int32ConstPtr msg, int32_t port){
 		//std::cout << rcio_names[port] << " " << msg->data << std::endl;
 		set_pulse(port, msg->data);
+	}
+
+	static void in_cb(int pi, unsigned int user_gpio, unsigned int level, unsigned int tick, void* userdata){
+		PgdRcio* obj = reinterpret_cast<PgdRcio*>(userdata);
+		obj->in_cb_proc(pi, user_gpio, level, tick);
+	}
+
+	void in_cb_proc(int pi, unsigned int user_gpio, unsigned int level, unsigned int tick){
+		if(level != 0){
+			rcio_rising_tick[user_gpio] = tick;
+		}else{
+			rcio_falling_tick[user_gpio] = tick;
+			std_msgs::Int32 msg;
+			msg.data = rcio_falling_tick[user_gpio] - rcio_rising_tick[user_gpio];
+			pub_rcins[user_gpio].publish(msg);
+		}
 	}
 	
 	int32_t set_pulse(int32_t port, int32_t pulsewidth){
