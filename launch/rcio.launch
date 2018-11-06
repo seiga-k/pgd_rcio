@@ -20,6 +20,18 @@
                 port: 19
                 dir: 0
                 default: 1000
+            aileron:
+                port: 12
+                dir: 1
+            elevator:
+                port: 16
+                dir: 1
+            throttle:
+                port: 20
+                dir: 1
+            rudder:
+                port: 21
+                dir: 1
         </rosparam>
     </node>
 </launch>
