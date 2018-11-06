@@ -66,7 +66,12 @@ public:
 					case PgdRcio::IN:
 						{
 							pub_rcins[port] = nh.advertise<std_msgs::Int32>(name, 1);
-							int ret = set_mode(mpi, port, PI_INPUT);
+							int ret = set_pull_up_down(mpi, port, PI_PUD_DOWN);
+							if(ret < 0){
+								ROS_ERROR("Pigpiod Error. Failed to set pull up / down : %s", pigpio_error(ret));
+								ros::shutdown();
+							}
+							ret = set_mode(mpi, port, PI_INPUT);
 							if(ret < 0){
 								ROS_ERROR("Pigpiod Error. Failed to set pin mode : %s", pigpio_error(ret));
 								ros::shutdown();
